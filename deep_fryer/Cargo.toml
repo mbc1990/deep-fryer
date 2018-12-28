@@ -1,0 +1,9 @@
+[package]
+name = "deep_fryer"
+version = "0.1.0"
+authors = ["mbc <malcolmbalch@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+imageproc = "0.17.0"
+image = "0.20.1"
