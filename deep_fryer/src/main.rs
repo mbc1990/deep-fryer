@@ -8,15 +8,26 @@ use image::ColorType;
 
 // Compiles and runs, but produces nonsense output
 fn main() {
-    let img = image::open("test.jpg").unwrap();
-    let mut out: Vec<u8> = Vec::new();
-    let mut encoder = JPEGEncoder::new_with_quality(&mut out, 10);
-    encoder.encode(
-        img.as_rgb8().unwrap(),
-        img.width(),
-        img.height(),
-        ColorType::RGB(8)
-    );
-    println!("Out: {:?}", out);
-    image::save_buffer("test_processed.jpg", &out[..], img.width(), img.height(), image::RGB(8)).unwrap()
+    let f = File::open("test.jpg").unwrap();
+    let mut decoder = JPEGDecoder::new(f);
+    let dims = decoder.dimensions().unwrap();
+    println!("ct: {:?}", decoder.colortype());
+    let img = decoder.read_image().unwrap();
+
+    match img {
+        DecodingResult::U8(to_encode) => {
+            println!("Processing vec of u8s");
+            let mut f_out = File::create("test_encoded.jpg").unwrap();
+            let mut encoder = JPEGEncoder::new_with_quality(&mut f_out, 100);
+            encoder.encode(
+                to_encode.as_slice(),
+                decoder.dimensions().unwrap().0,
+                decoder.dimensions().unwrap().1,
+                ColorType::RGB(8)
+            );
+        },
+        DecodingResult::U16(vec_of_u16s) => {
+            println!("Got a u16, sorry");
+        },
+    }
 }
